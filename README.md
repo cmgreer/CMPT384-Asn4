@@ -14,7 +14,7 @@ Good : B
 
 Bad : foo
 
-Bad : 0
+Bad : 3
 
 ## Operations
 
