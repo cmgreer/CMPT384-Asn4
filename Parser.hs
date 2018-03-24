@@ -1,4 +1,10 @@
--- TODO: implement parseExpr
+-- BNF grammar:
+--
+-- <formula> ::= "(" <element> ")"
+-- <element> ::= <prop> | "~" <formula> |
+--               <formula> "&" <formula> | <formula> "|" <formula> |
+--               <formula> "->" <formula> | <formula> "==" <formula>
+-- <prop> ::= [a-zA-Z]
 
 module Parser where
 
@@ -48,16 +54,45 @@ transform ((PropToken c):more) = LParen : (PropToken c) : RParen : (transform mo
 
 transform (t:more) = t : (transform more)
 
--- Parse an expression from a list of tokens.
+-- Parse a formula from a list of tokens.
 
-parseExpr :: [Token] -> Maybe (PF, [Token])
+parseFormula :: [Token] -> Maybe (PF, [Token])
 
-parseExpr _ = Nothing
+parseFormula (LParen:more) = case parseElem more of
+    Just (e, RParen:more) -> Just (e, more)
+    _ -> Nothing
+
+parseFormula _ = Nothing
+
+-- Parse an element from a list of tokens.
+
+parseElem :: [Token] -> Maybe(PF, [Token])
+
+parseElem ((PropToken c):more) = Just (Prop c, more)
+
+parseElem (Tilde:more) = case parseFormula more of
+    Just (f, more) -> Just (Neg f, more)
+    _ -> Nothing
+
+parseElem ts = case parseFormula ts of
+    Just (f, Ampersand:more) -> case parseFormula more of
+        Just (g, yetmore) -> Just (Conj f g, yetmore)
+        _ -> Nothing
+    Just (f, Bar:more) -> case parseFormula more of
+        Just (g, yetmore) -> Just (Disj f g, yetmore)
+        _ -> Nothing
+    Just (f, Arrow:more) -> case parseFormula more of
+        Just (g, yetmore) -> Just (Imp f g, yetmore)
+        _ -> Nothing
+    Just (f, DoubleEqual:more) -> case parseFormula more of
+        Just (g, yetmore) -> Just (Equiv f g, yetmore)
+        _ -> Nothing
+    _ -> Nothing
 
 -- Parse a PF from a string.
 
 parse :: [Char] -> Maybe PF
 
-parse cs = case parseExpr (transform (tokenize cs)) of
+parse cs = case parseFormula (transform (tokenize cs)) of
     Just (p, []) -> Just p
     _ -> Nothing
