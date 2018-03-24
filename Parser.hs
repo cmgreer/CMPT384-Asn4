@@ -6,7 +6,7 @@
 --               <formula> "->" <formula> | <formula> "==" <formula>
 -- <prop> ::= [a-zA-Z]
 
-module Parser where
+module Parser (parse) where
 
 import Data.Char
 import ProofGen (PF (..))
