@@ -10,7 +10,7 @@ data Token = PropToken Char |
              Ampersand |
              Bar |
              Arrow |
-             Equal |
+             DoubleEqual |
              LParen |
              RParen
              deriving Show
@@ -24,12 +24,13 @@ tokenize [] = []
 
 tokenize ('-':'>':more) = Arrow : (tokenize more)
 
+tokenize ('=':'=':more) = DoubleEqual : (tokenize more)
+
 tokenize (c:more)
     | isAlpha c    = (PropToken c) : (tokenize more)
     | c == '~'     = Tilde : (tokenize more)
     | c == '&'     = Ampersand : (tokenize more)
     | c == '|'     = Bar : (tokenize more)
-    | c == '='     = Equal : (tokenize more)
     | c == '('     = LParen : (tokenize more)
     | c == ')'     = RParen : (tokenize more)
     | otherwise    = tokenize more
