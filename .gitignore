@@ -1,3 +1,4 @@
 input/
+scripts/
 *.o
 *.hi
