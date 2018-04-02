@@ -9,7 +9,7 @@
 module Parser (parse) where
 
 import Data.Char
-import ProofGen (PF (..))
+import Proof (PF (..))
 
 data Token = PropToken Char |
              Tilde |
