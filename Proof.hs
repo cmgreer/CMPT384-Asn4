@@ -68,6 +68,7 @@ printPR (Proof "1b" Refuted conj []) prefix indent =
 -- TODO: add hypothesis or goal formula being reduced
 -- Subrefutation
 printPR (Proof rule Refuted conj subs) prefix indent =
+    prefix ++ indent ++
     "Refuted conjecture " ++ show conj ++
     " by rule " ++ rule ++
     " because " ++ (printPR (head (findRefuted subs)) "\n" ('\t':indent))
