@@ -1,4 +1,5 @@
 input/
+output/
 scripts/
 *.o
 *.hi
