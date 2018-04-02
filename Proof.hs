@@ -23,28 +23,74 @@ instance Show PF where
     show (Imp p1 p2) = "(" ++ show p1 ++ ")->(" ++ show p2 ++ ")"
     show (Equiv p1 p2) = "(" ++ show p1 ++ ")==(" ++ show p2 ++ ")"
 
--- Show the steps of a ProofResult.
+-- Show a ProofConjecture.
+
+instance Show ProofConjecture where
+    show (Conjecture h g) = show h ++ " " ++ show g
+
+-- Show a ProofResult.
 
 instance Show ProofResult where
-    show r = resultHelper r ("", "")
+    show r = printPR r "" ""
 
-resultHelper :: ProofResult -> ([Char], [Char]) -> [Char]
+printPR :: ProofResult -> [Char] -> [Char] -> [Char]
 
-resultHelper (Proof rule res (Conjecture h g) []) (prefix, indent) =
+-- Rule 1a
+printPR (Proof rule Proven (Conjecture h g) []) prefix indent =
     prefix ++ indent ++
-    show res ++ " conjecture with hypothesis list " ++ show h ++ " and goal list " ++ show g ++
-    " by rule " ++ rule
-
-resultHelper (Proof rule res (Conjecture h g) [sub]) (prefix, indent) =
-    prefix ++ indent ++
-    show res ++ " conjecture with hypothesis list " ++ show h ++ " and goal list " ++ show g ++
+    "Proved conjecture " ++ show (Conjecture h g) ++
     " by rule " ++ rule ++
-    " because " ++ (resultHelper sub ("\n", ('\t':indent)))
+    " with common proposition " ++ show (head (commonElems h g))
 
-resultHelper _ _ = "unknown"
+-- TODO: add hypothesis or goal formula being reduced
+-- Rules 2a, 2b, 3a, 4b, 5b
+printPR (Proof rule Proven conj [sub]) prefix indent =
+    prefix ++ indent ++
+    "Proved conjecture " ++ show conj ++
+    " by rule " ++ rule ++
+    " because" ++ (printPR sub "\n" ('\t':indent))
 
--- Show a Result.
+-- TODO: add hypothesis or goal formula being reduced
+-- Rules 3b, 4a, 5a, 6a, 6b
+printPR (Proof rule Proven conj [sub1, sub2]) prefix indent =
+    prefix ++ indent ++
+    "Proved conjecture " ++ show conj ++
+    " by rule " ++ rule ++
+    " because " ++
+    (printPR sub1 "\n" ('\t':indent)) ++
+    (printPR sub2 "\n" ('\t':indent))
 
-instance Show Result where
-    show Proven = "Proved"
-    show Refuted = "Refuted"
+-- Rule 1b
+printPR (Proof "1b" Refuted conj []) prefix indent =
+    prefix ++ indent ++
+    "Refuted conjecture " ++ show conj ++ " by rule 1b"
+
+-- TODO: add hypothesis or goal formula being reduced
+-- Subrefutation
+printPR (Proof rule Refuted conj subs) prefix indent =
+    "Refuted conjecture " ++ show conj ++
+    " by rule " ++ rule ++
+    " because " ++ (printPR (head (findRefuted subs)) "\n" ('\t':indent))
+
+printPR _ _ _ = "Print error: unrecognized result format"
+
+-- Find common elements of two lists of PFs.
+
+commonElems :: [PF] -> [PF] -> [PF]
+
+commonElems [] _ = []
+commonElems _ [] = []
+commonElems (p:more) other = case elem p other of
+    True -> p : (commonElems more other)
+    _ -> commonElems more other
+
+-- Find refuted ProofResults.
+
+findRefuted :: [ProofResult] -> [ProofResult]
+
+findRefuted [] = []
+
+findRefuted ((Proof rule Refuted conj subs):more) =
+    (Proof rule Refuted conj subs) : (findRefuted more)
+
+findRefuted (p:more) = findRefuted more
