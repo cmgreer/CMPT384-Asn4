@@ -42,7 +42,7 @@ printPR (Proof rule Proven (Conjecture h g) []) prefix indent =
     prefix ++ indent ++
     "Proved conjecture " ++ show (Conjecture h g) ++
     " by rule " ++ rule ++
-    " with common proposition " ++ show (head (commonElems h g))
+    " with common proposition " ++ show (head (commonProps h g))
 
 -- Rules 2a, 2b, 3a, 4b, 5b
 printPR (Proof rule Proven conj [sub]) prefix indent =
@@ -77,15 +77,16 @@ printPR (Proof rule Refuted conj subs) prefix indent =
 
 printPR _ _ _ = "Print error: unrecognized result format"
 
--- Find common elements of two lists of PFs.
+-- Find common propositions of two lists of PFs.
 
-commonElems :: [PF] -> [PF] -> [PF]
+commonProps :: [PF] -> [PF] -> [PF]
 
-commonElems [] _ = []
-commonElems _ [] = []
-commonElems (p:more) second = case elem p second of
-    True -> p : (commonElems more second)
-    _ -> commonElems more second
+commonProps [] _ = []
+commonProps _ [] = []
+commonProps ((Prop p):more) second = case elem (Prop p) second of
+    True -> (Prop p) : (commonProps more second)
+    _ -> commonProps more second
+commonProps (p:more) second = commonProps more second
 
 -- Find PFs that are in the first list but not the second.
 
