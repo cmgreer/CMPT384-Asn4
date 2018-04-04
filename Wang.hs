@@ -19,7 +19,7 @@ wang (Conjecture h ((Neg p):g)) = case rule1 (Conjecture h ((Neg p):g)) of
   (Just result) -> result
   _ -> case wang (Conjecture (p:h) g) of
     (Proof rule result conjecture subproofs) ->
-      (Proof "2b" result (Conjecture ((Neg p):h) g) [(Proof rule result conjecture subproofs)])
+      (Proof "2b" result (Conjecture h ((Neg p):g)) [(Proof rule result conjecture subproofs)])
 wang (Conjecture ((Conj p q):h) g) = case rule1 (Conjecture ((Conj p q):h) g) of
   (Just result) -> result
   _ -> case wang (Conjecture h (p:q:g)) of
